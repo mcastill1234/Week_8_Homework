@@ -214,8 +214,8 @@ def l1_reg(weight_matrix):
 
 
 def filter_reg(weights):
-    lam = 0
-    return lam * val
+    lam = 1000
+    return lam * K.abs(K.sum(weights))
 
 
 def get_image_data_1d(tsize, image_size, prob):
