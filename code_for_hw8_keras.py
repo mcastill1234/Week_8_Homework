@@ -12,7 +12,7 @@ np.random.seed(0)
 from keras import Sequential
 from keras.optimizers import SGD, Adam
 from keras.layers import Conv1D, Conv2D, Dense, Dropout, Flatten, MaxPooling2D
-from keras.utils import np_utils
+from keras.utils import np_utils, normalize
 from keras.callbacks import Callback
 from keras.datasets import mnist
 from keras import backend as K
@@ -92,7 +92,7 @@ def run_keras(X_train, y_train, X_val, y_val, X_test, y_test, layers, epochs, sp
     model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=["accuracy"])
     N = X_train.shape[0]
     # Pick batch size
-    batch = 32 if N > 1000 else 1  # batch size
+    batch = 64 if N > 1000 else 1  # batch size
     history = LossHistory()
     # Fit the model
     if X_val is None:
@@ -104,13 +104,13 @@ def run_keras(X_train, y_train, X_val, y_val, X_test, y_test, layers, epochs, sp
     # Evaluate the model on validation data, if any
     if X_val is not None or split > 0:
         val_acc, val_loss = history.values['epoch_val_accuracy'][-1], history.values['epoch_val_loss'][-1]
-        # print("\nLoss on validation set:" + str(val_loss) + " Accuracy on validation set: " + str(val_acc))
+        print("\nLoss on validation set:" + str(val_loss) + " Accuracy on validation set: " + str(val_acc))
     else:
         val_acc = None
     # Evaluate the model on test data, if any
     if X_test is not None:
         test_loss, test_acc = model.evaluate(X_test, y_test, batch_size=batch)
-        # print("\nLoss on test set:" + str(test_loss) + " Accuracy on test set: " + str(test_acc))
+        print("\nLoss on test set:" + str(test_loss) + " Accuracy on test set: " + str(test_acc))
     else:
         test_acc = None
     return model, history, val_acc, test_acc
@@ -303,13 +303,13 @@ def run_keras_fc_mnist(train, test, layers, epochs, split=0.1, verbose=True, tri
     for trial in range(trials):
         # Reset the weights
         # See https://github.com/keras-team/keras/issues/341
-        session = K.get_session()
-        for layer in layers:
-            for v in layer.__dict__:
-                v_arg = getattr(layer, v)
-                if hasattr(v_arg, 'initializer'):
-                    initializer_func = getattr(v_arg, 'initializer')
-                    initializer_func.run(session=session)
+        # session = K.get_session()
+        # for layer in layers:
+        #     for v in layer.__dict__:
+        #         v_arg = getattr(layer, v)
+        #         if hasattr(v_arg, 'initializer'):
+        #             initializer_func = getattr(v_arg, 'initializer')
+        #             initializer_func.run(session=session)
         # Run the model
         model, history, vacc, tacc = \
             run_keras(X_train, y_train, X_val, y_val, None, None, layers, epochs, split=split, verbose=verbose)
